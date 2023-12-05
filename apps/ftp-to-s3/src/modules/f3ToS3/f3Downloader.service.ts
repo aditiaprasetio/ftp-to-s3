@@ -5,14 +5,13 @@ import * as appJSON from '../../../app.json';
 import { Sequelize } from 'sequelize-typescript';
 import { FTPTOS3Model } from './ftp_to_s3.entity';
 import { CronJob } from 'cron';
-import ftpClient from 'ftp-client';
+import { CRON_FTP_DOWNLOADER, ftpClient } from '../../core/ftpClient';
 
-const CRON_FTP_TO_S3 = 'CRON_FTP_TO_S3';
 
 @Injectable()
-export class FTPTOS3SchedulerService {
-  private ftpClientApp;
-  private readonly logger = new Logger(FTPTOS3SchedulerService.name);
+export class FTPDownloaderSchedulerService {
+  private clientApp;
+  private readonly logger = new Logger(FTPDownloaderSchedulerService.name);
   constructor(
     // @InjectConnection(MAIN_DATABASE_CONNECTION)
     // @InjectConnection()
@@ -27,7 +26,7 @@ export class FTPTOS3SchedulerService {
 
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: CRON_FTP_TO_S3 })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: CRON_FTP_DOWNLOADER })
   handleCron() {
     this.logger.debug('handleCronTryCatch');
     this.handleCronTryCatch();
@@ -37,13 +36,17 @@ export class FTPTOS3SchedulerService {
     this.logger.log(
       '==== SCHEDULER START : Process ==== api v' + appJSON.version,
     );
-    const job = this.schedulerRegistry.getCronJob(CRON_FTP_TO_S3);
+    const job = this.schedulerRegistry.getCronJob(CRON_FTP_DOWNLOADER);
     job.stop();
 
     try {
       await this.process(job);
     } catch(err) {
       this.logger.error('PROCESS FAILED', err);
+      if (ftpClient) {
+        this.logger.log('FTP Connection closed');
+        ftpClient.close();
+      }
     }
 
     this.logger.log(
@@ -53,32 +56,51 @@ export class FTPTOS3SchedulerService {
   }
 
   async init() {
-    const config = {
-      host: process.env.FTP_HOST,
-      port: process.env.FTP_PORT,
-      user: process.env.FTP_USERNAME,
-      password: process.env.FTP_PASSWORD,
-    };
-    const options = {
-      logging: 'debug',
-      overwrite: 'older',
-    };
-    this.ftpClientApp = new ftpClient(config, options);
+    this.logger.log('ftpClient', ftpClient);
+    ftpClient.ftp.verbose = true;
+    try {
+      const config = {
+        host: process.env.FTP_HOST,
+        port: Number(process.env.FTP_PORT),
+        user: process.env.FTP_USERNAME,
+        password: process.env.FTP_PASSWORD,
+        secure: false,
+      };
+
+      this.logger.log('config', config);
+      if (ftpClient.closed) {
+        const resConnect = await ftpClient.access(config);
+        this.logger.log('resConnect', resConnect);
+      } else {
+        ftpClient.close();
+        const resConnect = await ftpClient.access(config);
+        this.logger.log('resConnect after close', resConnect);
+      }
+
+      const list = await ftpClient.list();
+
+      this.logger.log('list files', JSON.stringify(list));
+      for (const item of list) {
+        this.logger.log('item', JSON.stringify(item));
+      }
+      // await ftpClient.downloadTo('README_COPY.md', 'README_FTP.md');
+    } catch (err) {
+      this.logger.error(err);
+      return Promise.reject(err);
+    }
   }
 
   async process(job: CronJob) {
-    await this.ftpClientApp.connect(() => {
-      this.downloadFromFTP();
-    });
+    await this.init();
+    await this.downloadFromFTP();
   }
 
   async downloadFromFTP() {
-    this.ftpClientApp.download(
-      process.env.FTP_REMOTE_DIR,
+    const resDownload = await ftpClient.downloadTo(
       process.env.DOWNLOADED_DIR,
-      (result) => {
-        this.logger.log('download result', result);
-      }
+      process.env.FTP_REMOTE_DIR,
     );
+
+    this.logger.log('resDownload', resDownload);
   }
 }

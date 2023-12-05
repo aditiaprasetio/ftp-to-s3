@@ -61,6 +61,7 @@ export class S3UploaderSchedulerService {
   }
 
   async process(job: CronJob) {
+    this.init();
     try {
       const params = {
         ACL: ObjectCannedACL.public_read,
