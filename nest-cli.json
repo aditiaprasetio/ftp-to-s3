@@ -1,0 +1,22 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "projects": {
+    "ftp-to-s3": {
+      "type": "application",
+      "root": "apps/ftp-to-s3",
+      "entryFile": "main",
+      "sourceRoot": "apps/ftp-to-s3/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ftp-to-s3/tsconfig.app.json"
+      }
+    }
+  },
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/readme/tsconfig.app.json",
+    "resolveJsonModule": true
+  },
+  "monorepo": true,
+  "root": "apps/readme"
+}
