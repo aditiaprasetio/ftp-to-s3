@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import * as appJSON from '../../../app.json';
-import { Sequelize } from 'sequelize-typescript';
-import { FTPTOS3Model } from './ftp_to_s3.entity';
 import { CronJob } from 'cron';
 import { S3Client, PutObjectAclCommand, ObjectCannedACL } from '@aws-sdk/client-s3';
+import { S3Service } from './s3.service';
 
 const CRON_S3_UPLOADER = 'CRON_S3_UPLOADER';
 
@@ -14,15 +12,7 @@ export class S3UploaderSchedulerService {
   private clientApp;
   private readonly logger = new Logger(S3UploaderSchedulerService.name);
   constructor(
-    // @InjectConnection(MAIN_DATABASE_CONNECTION)
-    // @InjectConnection()
-    // private rtTradingConnection: Connection,
     private schedulerRegistry: SchedulerRegistry,
-    @InjectModel(FTPTOS3Model)
-    private readonly depositBlacklistRepositories: typeof FTPTOS3Model,
-    // @InjectModel(NotificationModel, BCA_CONNECTION)
-    // private readonly notificationRepositories: typeof NotificationModel,
-    private readonly sequelizeInstance: Sequelize,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: CRON_S3_UPLOADER })
@@ -63,15 +53,7 @@ export class S3UploaderSchedulerService {
   async process(job: CronJob) {
     this.init();
     try {
-      const params = {
-        ACL: ObjectCannedACL.public_read,
-        Bucket: process.env.STORAGE_BUCKET,
-        Body: '',
-        Key: '',
-      };
-      const command = new PutObjectAclCommand(params);
-      const res = await this.clientApp.send(command);
-      this.logger.log('result', res);
+      //
     } catch (error) {
       // error handling.
     } finally {
