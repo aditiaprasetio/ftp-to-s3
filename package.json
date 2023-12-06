@@ -14,7 +14,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "start:ftp-to-s3": "ENV_PATH=apps/ftp-to-s3/.env.local npx nest start ftp-to-s3 --watch",
-    "start:ftp-to-s3-windows": "set ENV_PATH=apps/ftp-to-s3/.env&& npx nest start ftp-to-s3 --watch",
+    "start:ftp-to-s3-windows": "set ENV_PATH=apps/ftp-to-s3/.env.local && npx nest start ftp-to-s3 --watch",
     "run-migration-windows:h2h-dev": "cd apps/h2h& set ENV_PATH=.env & sequelize-cli db:migrate --env development& cd ../..",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
