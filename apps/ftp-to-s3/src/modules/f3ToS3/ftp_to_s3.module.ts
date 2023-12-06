@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 
 import { ScheduleModule } from '@nestjs/schedule';
-import { FTPDownloaderSchedulerService } from './f3Downloader.service';
 import { FTPTOS3Model } from './ftp_to_s3.entity';
 import { FTPDownloaderController } from './ftpDownloader.controller';
 import { S3UploaderController } from './s3Uploader.controller';
 import { S3Service } from './s3.service';
+import { S3UploaderSchedulerService } from './s3Uploader.service';
 
 @Module({
   imports: [
@@ -19,8 +19,8 @@ import { S3Service } from './s3.service';
     // SequelizeModule.forFeature([NotificationModel], SECONDARY_DATABASE_CONNECTION),
     ScheduleModule.forRoot(),
   ],
-  providers: [FTPDownloaderSchedulerService, S3Service],
+  providers: [S3Service, S3UploaderSchedulerService],
   controllers: [FTPDownloaderController, S3UploaderController],
-  exports: [FTPDownloaderSchedulerService, S3Service],
+  exports: [S3Service, S3UploaderSchedulerService],
 })
 export class FTPTOS3SchedulerModule {}
