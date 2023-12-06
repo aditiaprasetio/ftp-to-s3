@@ -2,23 +2,23 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import * as appJSON from '../../../app.json';
 import { CronJob } from 'cron';
-import { S3Client, PutObjectAclCommand, ObjectCannedACL } from '@aws-sdk/client-s3';
 import { S3Service } from './s3.service';
+import * as fs from 'fs';
 
 const CRON_S3_UPLOADER = 'CRON_S3_UPLOADER';
 
 @Injectable()
 export class S3UploaderSchedulerService {
-  private clientApp;
   private readonly logger = new Logger(S3UploaderSchedulerService.name);
   constructor(
     private schedulerRegistry: SchedulerRegistry,
+    private s3Service: S3Service,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: CRON_S3_UPLOADER })
   handleCron() {
     this.logger.debug('handleCronTryCatch');
-    // this.handleCronTryCatch();
+    this.handleCronTryCatch();
   }
 
   async handleCronTryCatch() {
@@ -40,34 +40,33 @@ export class S3UploaderSchedulerService {
     job.start();
   }
 
-  async init() {
-    this.clientApp = new S3Client({
-      region: 'sgp1',
-      credentials: {
-        accessKeyId: process.env.STORAGE_KEY_ID,
-        secretAccessKey: process.env.STORAGE_ACCESS_KEY,
-      },
-    });
-  }
-
   async process(job: CronJob) {
-    this.init();
-    try {
-      //
-    } catch (error) {
-      // error handling.
-    } finally {
-      // finally.
-    }
-  }
+    const list = await fs.readdirSync(process.env.DOWNLOADED_DIR);
+    this.logger.log('list', list);
 
-  async uploadToS3() {
-    this.clientApp.download(
-      process.env.FTP_REMOTE_DIR,
-      process.env.DOWNLOADED_DIR,
-      result => {
-        this.logger.log('download result', result);
-      },
-    );
+    for (const fileName of list) {
+      if (!fileName.includes('.')) {
+        continue;
+      }
+      const key = process.env.STORAGE_DIRECTORY + '/' + fileName;
+      this.logger.log('key', key);
+      const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
+
+      const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
+      if (!fs.existsSync(localDestDir)) {
+        fs.mkdirSync(localDestDir);
+      }
+      const localDestFile = localDestDir + '/' + fileName;
+
+      try {
+        const buffer = fs.readFileSync(localSrcFile);
+        await this.s3Service.upload(buffer, key);
+        fs.copyFileSync(localSrcFile, localDestFile);
+        fs.unlinkSync(localSrcFile);
+      } catch (err) {
+        this.logger.error('ERROR localSrcFile: ' + localSrcFile);
+        this.logger.error(err);
+      }
+    }
   }
 }
