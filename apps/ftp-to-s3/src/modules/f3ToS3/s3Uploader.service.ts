@@ -72,7 +72,7 @@ export class S3UploaderSchedulerService {
       }
       totalProcessedFile++;
       const key = process.env.STORAGE_DIRECTORY + '/' + fileName;
-      this.logger.log('key', key);
+      this.logger.log('key: ' + key);
       const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
 
       const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
