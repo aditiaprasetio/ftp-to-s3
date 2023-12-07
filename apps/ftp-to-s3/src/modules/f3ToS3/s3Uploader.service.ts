@@ -15,7 +15,7 @@ export class S3UploaderSchedulerService {
     private s3Service: S3Service,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: CRON_S3_UPLOADER })
+  @Cron(CronExpression.EVERY_SECOND, { name: CRON_S3_UPLOADER })
   handleCron() {
     this.logger.debug('handleCronTryCatch');
     this.handleCronTryCatch();
@@ -92,7 +92,7 @@ export class S3UploaderSchedulerService {
           '(CURRENT) Remaining: ' +
             remainingFilesCurrentProcess +
             ' ( ' +
-            ((remainingFilesCurrentProcess / countFilesCurrentProcess) * 100).toFixed() +
+            ((remainingFilesCurrentProcess / countFilesCurrentProcess) * 100).toFixed(2) +
             ' % )',
         );
         this.logger.log(
