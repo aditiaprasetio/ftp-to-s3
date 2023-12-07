@@ -21,6 +21,12 @@ export class S3UploaderSchedulerService {
     this.handleCronTryCatch();
   }
 
+  restartJob(job: CronJob) {
+    this.logger.log('Job restarted');
+    job.stop();
+    job.start();
+  }
+
   async handleCronTryCatch() {
     this.logger.log(
       '==== SCHEDULER START : Process ==== api v' + appJSON.version,
@@ -41,13 +47,24 @@ export class S3UploaderSchedulerService {
   }
 
   async process(job: CronJob) {
-    const list = await fs.readdirSync(process.env.DOWNLOADED_DIR);
-    this.logger.log('list', list);
+    const list = fs.readdirSync(process.env.DOWNLOADED_DIR);
+    const countFiles = list.length;
+    let remainingFiles = list.length;
+    let totalProcessedFile = 0;
+    let totalNotFile = 0;
+    this.logger.log('total files: ' + countFiles);
 
-    for (const fileName of list) {
+    const willProcessList = list.filter((_, index) => index < 500);
+    this.logger.log('total files (will process): ' + willProcessList.length);
+
+    for (const fileName of willProcessList) {
+      this.logger.log(`-> ${totalProcessedFile}/${willProcessList}/${countFiles}`);
+
       if (!fileName.includes('.')) {
+        totalNotFile++;
         continue;
       }
+      totalProcessedFile++;
       const key = process.env.STORAGE_DIRECTORY + '/' + fileName;
       this.logger.log('key', key);
       const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
@@ -63,6 +80,14 @@ export class S3UploaderSchedulerService {
         await this.s3Service.upload(buffer, key);
         fs.copyFileSync(localSrcFile, localDestFile);
         fs.unlinkSync(localSrcFile);
+        remainingFiles--;
+        this.logger.log(
+          'Remaining: ' +
+            remainingFiles +
+            ' ( ' +
+            Math.round(remainingFiles/countFiles*100) +
+            ' % )',
+        );
       } catch (err) {
         this.logger.error('ERROR localSrcFile: ' + localSrcFile);
         this.logger.error(err);

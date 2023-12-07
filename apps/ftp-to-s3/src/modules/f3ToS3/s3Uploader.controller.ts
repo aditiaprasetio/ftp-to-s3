@@ -18,7 +18,7 @@ export class S3UploaderController {
   async upload() {
     try {
       const list = await fs.readdirSync(process.env.DOWNLOADED_DIR);
-      this.logger.log('list', list);
+      
 
       for (const fileName of list) {
         if (!fileName.includes('.')) {
