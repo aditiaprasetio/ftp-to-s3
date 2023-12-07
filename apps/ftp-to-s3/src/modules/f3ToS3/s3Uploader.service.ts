@@ -55,6 +55,7 @@ export class S3UploaderSchedulerService {
     this.logger.log('total files: ' + countFiles);
 
     const willProcessList = list.filter((_, index) => index < 500);
+    let remainingFilesCurrentProcess = willProcessList.length;
     this.logger.log('total files (will process): ' + willProcessList.length);
 
     for (const fileName of willProcessList) {
@@ -82,10 +83,17 @@ export class S3UploaderSchedulerService {
         fs.unlinkSync(localSrcFile);
         remainingFiles--;
         this.logger.log(
-          'Remaining: ' +
+          '(CURRENT) Remaining: ' +
+            remainingFilesCurrentProcess +
+            ' ( ' +
+            Math.round(remainingFilesCurrentProcess/countFiles*100) +
+            ' % )',
+        );
+        this.logger.log(
+          '(OVERALL) Remaining: ' +
             remainingFiles +
             ' ( ' +
-            Math.round(remainingFiles/countFiles*100) +
+            Math.round((remainingFiles / countFiles) * 100) +
             ' % )',
         );
       } catch (err) {
