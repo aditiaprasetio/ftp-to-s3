@@ -96,11 +96,7 @@ export class S3UploaderSchedulerService {
             ' % )',
         );
         this.logger.log(
-          '(OVERALL) Remaining: ' +
-            remainingFiles +
-            ' ( ' +
-            ((remainingFiles / countFiles) * 100).toFixed(2) +
-            ' % )',
+          '(OVERALL) Remaining: ' + remainingFiles,
         );
       } catch (err) {
         this.logger.error('ERROR localSrcFile: ' + localSrcFile);
