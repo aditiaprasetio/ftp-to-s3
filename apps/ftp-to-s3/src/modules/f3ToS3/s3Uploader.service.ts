@@ -56,10 +56,14 @@ export class S3UploaderSchedulerService {
 
     const willProcessList = list.filter((_, index) => index < 500);
     let remainingFilesCurrentProcess = willProcessList.length;
-    this.logger.log('total files (will process): ' + willProcessList.length);
+    this.logger.log(
+      'total files (will process): ' + remainingFilesCurrentProcess,
+    );
 
     for (const fileName of willProcessList) {
-      this.logger.log(`-> ${totalProcessedFile}/${willProcessList}/${countFiles}`);
+      this.logger.log(
+        `-> ${totalProcessedFile}/${remainingFilesCurrentProcess}/${countFiles}`,
+      );
 
       if (!fileName.includes('.')) {
         totalNotFile++;
