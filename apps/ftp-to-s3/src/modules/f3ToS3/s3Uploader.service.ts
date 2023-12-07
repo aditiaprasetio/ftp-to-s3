@@ -92,7 +92,7 @@ export class S3UploaderSchedulerService {
           '(CURRENT) Remaining: ' +
             remainingFilesCurrentProcess +
             ' ( ' +
-            ((remainingFilesCurrentProcess / countFilesCurrentProcess) * 100).toFixed(), +
+            ((remainingFilesCurrentProcess / countFilesCurrentProcess) * 100).toFixed() +
             ' % )',
         );
         this.logger.log(
