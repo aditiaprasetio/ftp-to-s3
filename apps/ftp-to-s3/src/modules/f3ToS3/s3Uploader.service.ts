@@ -82,6 +82,7 @@ export class S3UploaderSchedulerService {
         fs.copyFileSync(localSrcFile, localDestFile);
         fs.unlinkSync(localSrcFile);
         remainingFiles--;
+        remainingFilesCurrentProcess--;
         this.logger.log(
           '(CURRENT) Remaining: ' +
             remainingFilesCurrentProcess +
