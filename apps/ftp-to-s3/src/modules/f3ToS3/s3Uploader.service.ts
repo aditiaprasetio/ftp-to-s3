@@ -105,6 +105,10 @@ export class S3UploaderSchedulerService {
         totalNotFile++;
         continue;
       }
+      if (!fileName.includes('Listing')) {
+        totalNotFile++;
+        continue;
+      }
 
       this.logger.log(
         `-> ${totalProcessedFile}/${remainingFilesCurrentProcess}/${countFiles}`,
@@ -169,6 +173,10 @@ export class S3UploaderSchedulerService {
       const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
       const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
       if (!fileName.includes('.')) {
+        totalNotFile++;
+        continue;
+      }
+      if (!fileName.includes('Listing')) {
         totalNotFile++;
         continue;
       }
