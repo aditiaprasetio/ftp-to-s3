@@ -105,7 +105,19 @@ export class S3UploaderSchedulerService {
         totalNotFile++;
         continue;
       }
-      if (!fileName.includes('Listing')) {
+
+      let isWillProcess = false;
+      const expPrefix = process.env.S3_UPLOADER_PREFIX ? process.env.S3_UPLOADER_PREFIX.split(',') : [];
+      if (expPrefix.length === 0) {
+        isWillProcess = true;
+      } else {
+        for (const prefix of expPrefix) {
+          if (fileName.includes(prefix)) {
+            isWillProcess = true;
+          }
+        }
+      }
+      if (!isWillProcess) {
         totalNotFile++;
         continue;
       }
@@ -176,7 +188,21 @@ export class S3UploaderSchedulerService {
         totalNotFile++;
         continue;
       }
-      if (!fileName.includes('Listing')) {
+      
+      let isWillProcess = false;
+      const expPrefix = process.env.FILE_FIXER_PREFIX
+        ? process.env.FILE_FIXER_PREFIX.split(',')
+        : [];
+      if (expPrefix.length === 0) {
+        isWillProcess = true;
+      } else {
+        for (const prefix of expPrefix) {
+          if (fileName.includes(prefix)) {
+            isWillProcess = true;
+          }
+        }
+      }
+      if (!isWillProcess) {
         totalNotFile++;
         continue;
       }
