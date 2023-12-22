@@ -9,4 +9,4 @@ Please use `yarn`
 - Run command `./run_migration.sh`
 
 ## How to Run API
-- Run command `yarn start:gtw`
+- Run command (windows) `yarn start:dev ftp-to-s3`
