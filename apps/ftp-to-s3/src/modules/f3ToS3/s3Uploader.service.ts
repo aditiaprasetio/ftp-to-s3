@@ -18,14 +18,18 @@ export class S3UploaderSchedulerService {
 
   @Cron(CronExpression.EVERY_SECOND, { name: CRON_FILE_FIX_ISSUE })
   handleCronFixFile() {
-    this.logger.debug('handleCronFixFile');
-    this.handleCronTryCatchFixFile();
+    if (process.env.RUN_SCHEDULER_FILE_FIXER === 'true') {
+      this.logger.debug('handleCronFixFile');
+      this.handleCronTryCatchFixFile();
+    }
   }
 
   @Cron(CronExpression.EVERY_SECOND, { name: CRON_S3_UPLOADER })
   handleCron() {
-    this.logger.debug('handleCron');
-    this.handleCronTryCatch();
+    if (process.env.RUN_SCHEDULER_S3_UPLOADER === 'true') {
+      this.logger.debug('handleCron');
+      this.handleCronTryCatch();
+    }
   }
 
   restartJob(job: CronJob) {
