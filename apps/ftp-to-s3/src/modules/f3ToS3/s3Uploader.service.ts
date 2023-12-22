@@ -61,21 +61,30 @@ export class S3UploaderSchedulerService {
       'total files (will process): ' + remainingFilesCurrentProcess,
     );
 
-    for (const fileName of willProcessList) {
-      this.logger.log(
-        `-> ${totalProcessedFile}/${remainingFilesCurrentProcess}/${countFiles}`,
-      );
-
+    for (const idx in willProcessList) {
+      let fileName = willProcessList[idx];
+      const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
+      const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
       if (!fileName.includes('.')) {
         totalNotFile++;
         continue;
       }
+
+      if (fileName.includes(',')) {
+        // rename file
+        const newFileName = fileName.replace(/,/g, '-');
+        fs.renameSync(localSrcFile, process.env.DOWNLOADED_DIR + '/' + newFileName)
+        fileName = newFileName;
+      }
+      
+      this.logger.log(
+        `-> ${totalProcessedFile}/${remainingFilesCurrentProcess}/${countFiles}`,
+      );
+
       totalProcessedFile++;
       const key = process.env.STORAGE_DIRECTORY + '/' + fileName;
       this.logger.log('key: ' + key);
-      const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
-
-      const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
+      
       if (!fs.existsSync(localDestDir)) {
         fs.mkdirSync(localDestDir);
       }
