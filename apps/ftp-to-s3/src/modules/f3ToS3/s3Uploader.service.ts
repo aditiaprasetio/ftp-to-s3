@@ -124,7 +124,7 @@ export class S3UploaderSchedulerService {
         fileName = newFileName;
 
         fs.copyFileSync(localDestFile, localSrcFile);
-        // fs.unlinkSync(localDestFile);
+        fs.unlinkSync(localDestFile);
 
         remainingFiles--;
         remainingFilesCurrentProcess--;
