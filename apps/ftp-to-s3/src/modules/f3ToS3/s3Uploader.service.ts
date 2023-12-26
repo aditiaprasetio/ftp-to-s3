@@ -96,18 +96,20 @@ export class S3UploaderSchedulerService {
 
     for (const idx in willProcessList) {
       let fileName = willProcessList[idx];
+      console.info('fileName', fileName);
       if (!fileName.includes('.')) {
         totalNotFile++;
         continue;
       }
 
+      console.info("fileName.includes(',')", fileName.includes(','));
       if (!fileName.includes(',')) {
         totalNotFile++;
         continue;
       }
 
       let isWillProcess = false;
-      const expPrefix = process.env.S3_UPLOADER_PREFIX ? process.env.S3_UPLOADER_PREFIX.split(',') : [];
+      const expPrefix = process.env.FILE_FIXER_PREFIX ? process.env.FILE_FIXER_PREFIX.split(',') : [];
       if (expPrefix.length === 0) {
         isWillProcess = true;
       } else {
@@ -190,8 +192,8 @@ export class S3UploaderSchedulerService {
       }
       
       let isWillProcess = false;
-      const expPrefix = process.env.FILE_FIXER_PREFIX
-        ? process.env.FILE_FIXER_PREFIX.split(',')
+      const expPrefix = process.env.S3_UPLOADER_PREFIX
+        ? process.env.S3_UPLOADER_PREFIX.split(',')
         : [];
       if (expPrefix.length === 0) {
         isWillProcess = true;
