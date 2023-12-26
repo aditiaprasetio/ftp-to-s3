@@ -78,8 +78,8 @@ export class S3UploaderSchedulerService {
 
   // from uploaded to upper folder
   async processFixFile(job: CronJob) {
-    const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
-    const list = fs.readdirSync(localDestDir);
+    const uploadedDir = process.env.DOWNLOADED_DIR + '/uploaded';
+    const list = fs.readdirSync(uploadedDir);
     const countFiles = list.length;
     let remainingFiles = list.length;
     let totalProcessedFile = 0;
@@ -128,19 +128,19 @@ export class S3UploaderSchedulerService {
 
       totalProcessedFile++;
 
-      if (!fs.existsSync(localDestDir)) {
-        fs.mkdirSync(localDestDir);
+      if (!fs.existsSync(uploadedDir)) {
+        fs.mkdirSync(uploadedDir);
       }
-      const localDestFile = localDestDir + '/' + fileName;
+      const fromUploadedFolderFile = uploadedDir + '/' + fileName;
 
       try {
         // rename file
         const newFileName = fileName.replace(/,/g, '-');
-        const localSrcFile = process.env.DOWNLOADED_DIR + '/' + newFileName;
+        const fromBaseGeniusFolderFile = process.env.DOWNLOADED_DIR + '/' + newFileName;
         fileName = newFileName;
 
-        fs.copyFileSync(localDestFile, localSrcFile);
-        fs.unlinkSync(localDestFile);
+        fs.copyFileSync(fromUploadedFolderFile, fromBaseGeniusFolderFile);
+        fs.unlinkSync(fromUploadedFolderFile);
 
         remainingFiles--;
         remainingFilesCurrentProcess--;
@@ -158,7 +158,7 @@ export class S3UploaderSchedulerService {
         this.logger.log('processFixFile - (OVERALL) Remaining: ' + remainingFiles);
       } catch (err) {
         this.logger.error(
-          'processFixFile - ERROR localDestFile: ' + localDestFile,
+          'processFixFile - ERROR uploadedDir: ' + uploadedDir,
         );
         this.logger.error(err);
       }
