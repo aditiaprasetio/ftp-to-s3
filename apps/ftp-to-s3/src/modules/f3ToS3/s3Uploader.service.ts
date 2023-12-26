@@ -86,7 +86,7 @@ export class S3UploaderSchedulerService {
     let totalNotFile = 0;
     this.logger.log('processFixFile - total files: ' + countFiles);
 
-    // const willProcessList = list.filter((_, index) => index < 500);
+    // let willProcessList = list.filter((_, index) => index < 500);
     const willProcessList = list.filter((_, index) => index >= 0);
     const countFilesCurrentProcess = willProcessList.length;
     let remainingFilesCurrentProcess = willProcessList.length;
@@ -176,7 +176,8 @@ export class S3UploaderSchedulerService {
     let totalNotFile = 0;
     this.logger.log('total files: ' + countFiles);
 
-    const willProcessList = list.filter((_, index) => index < 500);
+    // const willProcessList = list.filter((_, index) => index < 500);
+    const willProcessList = list.filter((_, index) => index >= 0);
     const countFilesCurrentProcess = willProcessList.length;
     let remainingFilesCurrentProcess = willProcessList.length;
     this.logger.log(
