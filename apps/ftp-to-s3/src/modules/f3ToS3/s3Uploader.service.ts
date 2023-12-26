@@ -87,7 +87,7 @@ export class S3UploaderSchedulerService {
     this.logger.log('processFixFile - total files: ' + countFiles);
 
     const willProcessList = list.filter((itemName, index) =>
-      this.isWillProcess(itemName, process.env.FILE_FIXER_PREFIX),
+      this.isWillProcess(itemName, process.env.FILE_FIXER_PREFIX) && itemName.includes(','),
     );
     const countFilesCurrentProcess = willProcessList.length;
     let remainingFilesCurrentProcess = willProcessList.length;
@@ -221,20 +221,20 @@ export class S3UploaderSchedulerService {
       return false;
     }
 
-    let isWillProcess = false;
+    let isWillBeProcessssss = false;
     const expPrefix = prefixWillProcess
       ? prefixWillProcess.split(',')
       : [];
     if (expPrefix.length === 0) {
-      isWillProcess = true;
+      isWillBeProcessssss = true;
     } else {
       for (const prefix of expPrefix) {
         if (fileName.includes(prefix)) {
-          isWillProcess = true;
+          isWillBeProcessssss = true;
         }
       }
     }
-    if (!isWillProcess) {
+    if (!isWillBeProcessssss) {
       return false;
     }
 
