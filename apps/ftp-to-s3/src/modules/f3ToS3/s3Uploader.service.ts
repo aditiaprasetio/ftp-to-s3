@@ -86,8 +86,9 @@ export class S3UploaderSchedulerService {
     let totalNotFile = 0;
     this.logger.log('processFixFile - total files: ' + countFiles);
 
-    // let willProcessList = list.filter((_, index) => index < 500);
-    const willProcessList = list.filter((_, index) => index >= 0);
+    const willProcessList = list.filter((itemName, index) =>
+      this.isWillProcess(itemName, process.env.FILE_FIXER_PREFIX),
+    );
     const countFilesCurrentProcess = willProcessList.length;
     let remainingFilesCurrentProcess = willProcessList.length;
     this.logger.log(
@@ -98,32 +99,6 @@ export class S3UploaderSchedulerService {
     for (const idx in willProcessList) {
       let fileName = willProcessList[idx];
       console.info('fileName', fileName);
-      if (!fileName.includes('.')) {
-        totalNotFile++;
-        continue;
-      }
-
-      console.info("fileName.includes(',')", fileName.includes(','));
-      if (!fileName.includes(',')) {
-        totalNotFile++;
-        continue;
-      }
-
-      let isWillProcess = false;
-      const expPrefix = process.env.FILE_FIXER_PREFIX ? process.env.FILE_FIXER_PREFIX.split(',') : [];
-      if (expPrefix.length === 0) {
-        isWillProcess = true;
-      } else {
-        for (const prefix of expPrefix) {
-          if (fileName.includes(prefix)) {
-            isWillProcess = true;
-          }
-        }
-      }
-      if (!isWillProcess) {
-        totalNotFile++;
-        continue;
-      }
 
       this.logger.log(
         `-> ${totalProcessedFile}/${remainingFilesCurrentProcess}/${countFiles}`,
@@ -139,7 +114,8 @@ export class S3UploaderSchedulerService {
       try {
         // rename file
         const newFileName = fileName.replace(/,/g, '-');
-        const fromBaseGeniusFolderFile = process.env.DOWNLOADED_DIR + '/' + newFileName;
+        const fromBaseGeniusFolderFile =
+          process.env.DOWNLOADED_DIR + '/' + newFileName;
         fileName = newFileName;
 
         fs.copyFileSync(fromUploadedFolderFile, fromBaseGeniusFolderFile);
@@ -147,7 +123,7 @@ export class S3UploaderSchedulerService {
 
         remainingFiles--;
         remainingFilesCurrentProcess--;
-        
+
         this.logger.log(
           'processFixFile - (CURRENT) Remaining: ' +
             remainingFilesCurrentProcess +
@@ -158,11 +134,11 @@ export class S3UploaderSchedulerService {
             ).toFixed(2) +
             ' % )',
         );
-        this.logger.log('processFixFile - (OVERALL) Remaining: ' + remainingFiles);
-      } catch (err) {
-        this.logger.error(
-          'processFixFile - ERROR uploadedDir: ' + uploadedDir,
+        this.logger.log(
+          'processFixFile - (OVERALL) Remaining: ' + remainingFiles,
         );
+      } catch (err) {
+        this.logger.error('processFixFile - ERROR uploadedDir: ' + uploadedDir);
         this.logger.error(err);
       }
     }
@@ -177,7 +153,10 @@ export class S3UploaderSchedulerService {
     this.logger.log('total files: ' + countFiles);
 
     // const willProcessList = list.filter((_, index) => index < 500);
-    const willProcessList = list.filter((_, index) => index >= 0);
+    const willProcessList = list.filter((itemName, index) =>
+      this.isWillProcess(itemName, process.env.S3_UPLOADER_PREFIX),
+    );
+
     const countFilesCurrentProcess = willProcessList.length;
     let remainingFilesCurrentProcess = willProcessList.length;
     this.logger.log(
@@ -188,28 +167,6 @@ export class S3UploaderSchedulerService {
       let fileName = willProcessList[idx];
       const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
       const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
-      if (!fileName.includes('.')) {
-        totalNotFile++;
-        continue;
-      }
-      
-      let isWillProcess = false;
-      const expPrefix = process.env.S3_UPLOADER_PREFIX
-        ? process.env.S3_UPLOADER_PREFIX.split(',')
-        : [];
-      if (expPrefix.length === 0) {
-        isWillProcess = true;
-      } else {
-        for (const prefix of expPrefix) {
-          if (fileName.includes(prefix)) {
-            isWillProcess = true;
-          }
-        }
-      }
-      if (!isWillProcess) {
-        totalNotFile++;
-        continue;
-      }
 
       if (fileName.includes(',')) {
         // rename file
@@ -257,5 +214,30 @@ export class S3UploaderSchedulerService {
         this.logger.error(err);
       }
     }
+  }
+
+  isWillProcess(fileName: string, prefixWillProcess: string) {
+    if (!fileName.includes('.')) {
+      return false;
+    }
+
+    let isWillProcess = false;
+    const expPrefix = prefixWillProcess
+      ? prefixWillProcess.split(',')
+      : [];
+    if (expPrefix.length === 0) {
+      isWillProcess = true;
+    } else {
+      for (const prefix of expPrefix) {
+        if (fileName.includes(prefix)) {
+          isWillProcess = true;
+        }
+      }
+    }
+    if (!isWillProcess) {
+      return false;
+    }
+
+    return true;
   }
 }
