@@ -113,7 +113,7 @@ export class S3UploaderSchedulerService {
 
       try {
         // rename file
-        const newFileName = fileName.replace(/,/g, '-');
+        const newFileName = fileName.replace(/,/g, '-').replace(/+/g, '-');
         const fromBaseGeniusFolderFile =
           process.env.DOWNLOADED_DIR + '/' + newFileName;
         fileName = newFileName;
@@ -177,9 +177,18 @@ export class S3UploaderSchedulerService {
         );
         fileName = newFileName;
       }
+      if (fileName.includes('+')) {
+        // rename file
+        const newFileName = fileName.replace(/+/g, '-');
+        fs.renameSync(
+          localSrcFile,
+          process.env.DOWNLOADED_DIR + '/' + newFileName,
+        );
+        fileName = newFileName;
+      }
 
       this.logger.log(
-        `-> ${totalProcessedFile}/${remainingFilesCurrentProcess}/${countFiles}`,
+        `-> ${totalProcessedFile}/${remainingFilesCurrentProcess}/${countFilesCurrentProcess}`,
       );
 
       totalProcessedFile++;
