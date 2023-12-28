@@ -165,7 +165,7 @@ export class S3UploaderSchedulerService {
 
     for (const idx in willProcessList) {
       let fileName = willProcessList[idx];
-      const localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
+      let localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
       const localDestDir = process.env.DOWNLOADED_DIR + '/uploaded';
 
       if (fileName.includes(',')) {
@@ -176,6 +176,7 @@ export class S3UploaderSchedulerService {
           process.env.DOWNLOADED_DIR + '/' + newFileName,
         );
         fileName = newFileName;
+        localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
       }
       if (fileName.includes('+')) {
         // rename file
@@ -185,6 +186,7 @@ export class S3UploaderSchedulerService {
           process.env.DOWNLOADED_DIR + '/' + newFileName,
         );
         fileName = newFileName;
+        localSrcFile = process.env.DOWNLOADED_DIR + '/' + fileName;
       }
 
       this.logger.log(
