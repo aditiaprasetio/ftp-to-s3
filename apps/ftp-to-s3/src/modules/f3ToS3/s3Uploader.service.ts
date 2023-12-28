@@ -179,7 +179,7 @@ export class S3UploaderSchedulerService {
       }
       if (fileName.includes('+')) {
         // rename file
-        const newFileName = fileName.replace(/+/g, '-');
+        const newFileName = fileName.replace(/\+/g, '-');
         fs.renameSync(
           localSrcFile,
           process.env.DOWNLOADED_DIR + '/' + newFileName,
