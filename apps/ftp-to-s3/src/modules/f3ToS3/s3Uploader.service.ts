@@ -113,7 +113,7 @@ export class S3UploaderSchedulerService {
 
       try {
         // rename file
-        const newFileName = fileName.replace(/,/g, '-').replace(/+/g, '-');
+        const newFileName = fileName.replace(/,/g, '-').replace(/\+/g, '-');
         const fromBaseGeniusFolderFile =
           process.env.DOWNLOADED_DIR + '/' + newFileName;
         fileName = newFileName;
